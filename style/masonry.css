@@ -7,7 +7,7 @@ img {
   display: flex;
   width: 100%;
   flex-flow: row wrap;
-  margin-left: -8px; /* Adjustment for the gutter */
+  margin-left: -8px;
   counter-reset: brick;
 }
 
@@ -19,9 +19,8 @@ img {
 .masonry-brick {
   overflow: hidden;
   border-radius: 10px;
-  margin: 0 0 8px 8px;  /* Some Gutter */
+  margin: 0 0 8px 8px;
   background-color: #333;
-  color: white;
   position: relative;
 
   flex: auto;
@@ -32,27 +31,7 @@ img {
   box-shadow: 2px 2px 8px 2px rgba(0,0,0,0.2);
 }
 
-/* .masonry-brick:after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 5000;
-  transform: translate(-50%, -50%);
-  counter-increment: brick;
-  content: counter(brick);
-  transition: font-size .25s, opacity .25s ease-in-out;
-  font-weight: 700;
-  opacity: .5;
-  font-size: 1.25em;
-}
-
-.masonry-brick:hover:after {
-  font-size: 2.25em;
-  opacity: 1;
-} */
-
 @media only screen and (min-width: 1024px) {
-  /* Horizontal masonry bricks on desktop-sized screen */
   .masonry-brick:nth-child(4n+1) {
     width: 125px;
   }
@@ -68,7 +47,6 @@ img {
 }
 
 @media only screen and (max-width: 1023px) and (min-width: 768px) {
-  /* Horizontal masonry bricks on tabled-sized screen */
   .masonry-brick:nth-child(4n+1) {
     width: 100px;
   }
