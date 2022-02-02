@@ -1,0 +1,37 @@
+* {
+  box-sizing: border-box;
+}
+
+:before, :after {
+  box-sizing: inherit;
+  text-decoration: inherit;
+}
+
+:root, html {
+  font-size: 100%;
+  height: 100%;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+pre, code {
+  font-family: monospace;
+  font-size: 1em;
+}
+
+/* use the value of 'color' to style svg elements */
+svg {
+  fill: currentColor;
+}
+
+textarea {
+  resize: vertical;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  margin: 0;
+  padding: 0;
+}
