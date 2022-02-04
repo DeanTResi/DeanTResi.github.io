@@ -1,0 +1,38 @@
+.navbar-lewagon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90px;
+  box-shadow: 5px 0 10px rgba(0,0,0,0.15);
+  background-size: cover;
+  /* transform: scale(1); */
+}
+.navbar-lewagon img {
+  width: 50px;
+}
+.navbar-lewagon:hover img {
+  transform: scale(1.05);
+}
+
+.nav-tab {
+  padding: 0;
+}
+
+/* .nav-link-tab {
+  text-decoration: none;
+  background-color: rgb(230,230,230);
+  color: rgb(80,80,80);
+  letter-spacing: 0.15em;
+  padding: 10px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-left: 5px solid rgb(180,0,0);
+  margin: 0;
+  border-radius: 0px 12px 0px 12px;
+  transition: background-color 0.5s, border-color 0.1s, color 0.3s;
+}
+
+.nav-link-tab:hover {
+  background-color: rgb(220,220,220);
+  color: rgb(100,100,100);
+  border-color: rgb(255, 66, 8);
+} */

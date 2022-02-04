@@ -1,0 +1,46 @@
+.banner {
+  min-height: 60vh;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  background-size: cover;
+  border-bottom-left-radius: 30px;
+}
+
+.banner .container { /* override default container width */
+  width: 600px;
+}
+
+.banner h1 {
+  color: white;
+  background-color: rgba(0,0,0,0.5);
+  padding: 40px 40px;
+  margin: 0px 0;
+  border-radius: 20px 0 20px 0;
+}
+
+.banner p {
+  /* font-weight: bold; */
+  margin: 20px 10px;
+  color: rgb(210,210,210);
+  text-shadow: 0 2px 4px #000;
+}
+
+/* .card-category {
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin: 20px 0;
+  border-left: 5px solid rgb(180,0,0);
+  border-radius: 0px 18px 0px 18px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+.card-category h2 {
+  color: white;
+  background-color: rgba(0,0,0,0.5);
+  padding: 20px 20px;
+  margin: 60px 0;
+  border-radius: 20px 0 20px 0;
+} */

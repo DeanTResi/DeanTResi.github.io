@@ -1,0 +1,26 @@
+footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 200px;
+  background-color: #000;
+  /* width: 100%; */
+  font-size: 60%;
+  color: white;
+  border-top-left-radius: 30px;
+  /* background-image: linear-gradient(180deg, rgb(0,0,0,0.1) 30%, rgba(0,0,0,0.1)); */
+  background-image: linear-gradient(45deg, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.7)), url(https://picsum.photos/id/825/1000/600);
+  padding: 30px 40px;
+  margin: 0;
+  background-size: cover;
+}
+
+footer ul {
+  list-style: none;
+  padding: 0;
+  display: block;
+}
+
+footer li {
+  letter-spacing: 0.15em;
+}
