@@ -60,6 +60,7 @@ h3 { font-size: 14px; margin: 18px 0 8px; text-transform: uppercase; letter-spac
 p.lead { margin: 0 0 20px; color: var(--muted); }
 .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 861px) { .card.sticky { position: sticky; top: 16px; } }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
 .preview-box { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; overflow-x: auto; color: #000000; font-family: Arial, Helvetica, sans-serif; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
@@ -104,7 +105,7 @@ img.howto { display: block; max-width: 100%; height: auto; border: 1px solid var
   <p class="lead">Change the fields on the right. The signature updates as you type. Your values stay in this browser only.</p>
 
   <div class="grid">
-    <section class="card">
+    <section class="card sticky">
       <h2>Signature</h2>
       <div class="preview-box" id="preview"></div>
       <div class="actions">
