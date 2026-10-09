@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email Signature Builder</title>
+<style>
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --border: #d9dce1;
+  --text: #1b1f24;
+  --muted: #5d6470;
+  --accent: #1155cc;
+  --accent-text: #ffffff;
+  --warn: #a4430a;
+  --ok: #1e7a3c;
+  --code-bg: #0f1722;
+  --code-text: #e6edf3;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151a;
+    --surface: #1b2027;
+    --border: #2f3640;
+    --text: #e8eaed;
+    --muted: #9aa3ae;
+    --accent: #6ea8ff;
+    --accent-text: #0b1220;
+    --warn: #ffb27a;
+    --ok: #6fd391;
+    --code-bg: #0b0f15;
+    --code-text: #e6edf3;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151a;
+  --surface: #1b2027;
+  --border: #2f3640;
+  --text: #e8eaed;
+  --muted: #9aa3ae;
+  --accent: #6ea8ff;
+  --accent-text: #0b1220;
+  --warn: #ffb27a;
+  --ok: #6fd391;
+  --code-bg: #0b0f15;
+  --code-text: #e6edf3;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 22px; margin: 0 0 4px; }
+h2 { font-size: 17px; margin: 0 0 12px; }
+h3 { font-size: 14px; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+p.lead { margin: 0 0 20px; color: var(--muted); }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+.preview-box { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; overflow-x: auto; color: #000000; font-family: Arial, Helvetica, sans-serif; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+button {
+  font: inherit; font-weight: 600; cursor: pointer; border-radius: 7px; padding: 8px 14px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text);
+}
+button.secondary { background: transparent; color: var(--accent); }
+.status { font-size: 13px; color: var(--muted); min-height: 1.5em; }
+.status.warn { color: var(--warn); }
+.status.ok { color: var(--ok); }
+label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+input[type="text"], input[type="url"], input[type="number"] {
+  width: 100%; font: inherit; font-size: 14px; padding: 7px 9px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+}
+input[type="color"] { width: 48px; height: 34px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); padding: 2px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.note { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.note.warn { color: var(--warn); }
+.note.ok { color: var(--ok); }
+.form h3:first-child { margin-top: 0; }
+.manual { margin-top: 20px; }
+.manual ol { padding-left: 22px; margin: 0 0 14px; }
+.manual li { margin: 6px 0; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+pre {
+  background: var(--code-bg); color: var(--code-text); border-radius: 8px; padding: 14px;
+  overflow-x: auto; margin: 0; max-height: 420px;
+}
+table.keys { border-collapse: collapse; width: 100%; font-size: 13px; margin: 6px 0 14px; }
+table.keys th, table.keys td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.tablewrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Email signature builder</h1>
+  <p class="lead">Change the fields on the right. The signature updates as you type. Your values stay in this browser only.</p>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Signature</h2>
+      <div class="preview-box" id="preview"></div>
+      <div class="actions">
+        <button id="copySig" type="button">Copy signature</button>
+        <button id="reset" type="button" class="secondary">Reset all fields</button>
+      </div>
+      <div class="status" id="status"></div>
+      <p class="note">Then in Gmail: Settings → See all settings → General → Signature. Delete the old signature, paste, and click Save changes. Send yourself a test email to check it.</p>
+    </section>
+
+    <section class="card form" id="form">
+      <h3>Name picture</h3>
+      <label for="nameImg">Name and title picture address</label>
+      <input type="url" id="nameImg" data-k="nameImg" placeholder="https://lh3.googleusercontent.com/d/...">
+      <div class="note" data-note="nameImg"></div>
+      <div class="row">
+        <div>
+          <label for="nameW">Display width (px)</label>
+          <input type="number" id="nameW" data-k="nameW" min="20" max="420">
+        </div>
+        <div>
+          <label for="nameH">Display height (px)</label>
+          <input type="number" id="nameH" data-k="nameH" min="10" max="300">
+        </div>
+      </div>
+      <div class="note">The height is set from the picture's proportions when the picture loads.</div>
+      <div class="row">
+        <div>
+          <label for="name">Full name</label>
+          <input type="text" id="name" data-k="name">
+        </div>
+        <div>
+          <label for="title">Job title</label>
+          <input type="text" id="title" data-k="title">
+        </div>
+      </div>
+      <div class="note">The name and title are in the picture. These two fields are the text shown when a client blocks pictures.</div>
+      <label for="divider">Divider colour</label>
+      <input type="color" id="divider" data-k="divider">
+
+      <h3>Contact details</h3>
+      <label for="phone">Phone number</label>
+      <input type="text" id="phone" data-k="phone">
+      <label for="email">Email address</label>
+      <input type="text" id="email" data-k="email">
+      <label for="addr1">Address line 1</label>
+      <input type="text" id="addr1" data-k="addr1">
+      <label for="addr2">Address line 2</label>
+      <input type="text" id="addr2" data-k="addr2">
+      <label for="web">Website</label>
+      <input type="text" id="web" data-k="web">
+
+      <h3>Icons and banner</h3>
+      <label for="liUrl">LinkedIn page</label>
+      <input type="url" id="liUrl" data-k="liUrl">
+      <label for="liImg">LinkedIn icon picture address</label>
+      <input type="url" id="liImg" data-k="liImg" placeholder="https://lh3.googleusercontent.com/d/...">
+      <div class="note" data-note="liImg"></div>
+      <label for="ytUrl">YouTube page</label>
+      <input type="url" id="ytUrl" data-k="ytUrl">
+      <label for="ytImg">YouTube icon picture address</label>
+      <input type="url" id="ytImg" data-k="ytImg" placeholder="https://lh3.googleusercontent.com/d/...">
+      <div class="note" data-note="ytImg"></div>
+      <label for="bannerImg">Banner picture address</label>
+      <input type="url" id="bannerImg" data-k="bannerImg" placeholder="https://lh3.googleusercontent.com/d/...">
+      <div class="note" data-note="bannerImg"></div>
+      <label for="bannerUrl">Banner link</label>
+      <input type="url" id="bannerUrl" data-k="bannerUrl">
+      <p class="note">Leave a page address empty to remove that icon. Leave an address line empty to remove that line.</p>
+    </section>
+  </div>
+
+  <section class="card manual">
+    <h2>Manual instructions (without this page)</h2>
+
+    <h3>Prepare the pictures</h3>
+    <ol>
+      <li>Make each picture file 2 times its display size. For example, a 28 × 28 icon must be a 56 × 56 file.</li>
+      <li>Upload the files to Google Drive. Share each file as <strong>Anyone with the link</strong>.</li>
+      <li>Get each picture address. Use one of these methods:
+        <ul>
+          <li>Copy the Drive share link, for example <code>https://drive.google.com/file/d/FILE_ID/view</code>. Use <code>https://lh3.googleusercontent.com/d/FILE_ID</code> as the picture address.</li>
+          <li>In the Gmail signature box, use Insert image → Google Drive. Right-click the picture → Copy image address. Then delete the picture from the box.</li>
+        </ul>
+      </li>
+      <li>Open each picture address in a private browser window. If the picture does not show, the file is not shared correctly.</li>
+    </ol>
+
+    <h3>Make the signature</h3>
+    <ol>
+      <li>Click <strong>Copy code</strong> below.</li>
+      <li>Paste the code into a plain text editor: Notepad on Windows, or TextEdit on Mac. In TextEdit, first select Format → Make Plain Text.</li>
+      <li>Replace every value in capital letters with your own value. Some values appear more than once: replace every copy. The table below the code explains each value.</li>
+      <li>Save the file as <code>signature.html</code>.</li>
+      <li>Open <code>signature.html</code> in Chrome. Check that all pictures show.</li>
+      <li>Select all (<code>Ctrl+A</code> or <code>Cmd+A</code>) and copy (<code>Ctrl+C</code> or <code>Cmd+C</code>).</li>
+      <li>In Gmail, go to Settings → See all settings → General → Signature. Delete the old signature, paste, and click <strong>Save changes</strong>.</li>
+      <li>Send yourself a test email. Open it in Gmail and in Apple Mail or Outlook, and check that it looks the same.</li>
+    </ol>
+
+    <div class="actions" style="margin: 0 0 10px;">
+      <button id="copyCode" type="button">Copy code</button>
+      <span class="status" id="codeStatus"></span>
+    </div>
+    <pre><code id="template"></code></pre>
+
+    <h3>Values to replace</h3>
+    <div class="tablewrap">
+      <table class="keys">
+        <thead><tr><th>Value</th><th>Replace with</th></tr></thead>
+        <tbody id="keys"></tbody>
+      </table>
+    </div>
+    <p class="note">Do not change the <code>width</code>, <code>height</code> or <code>style</code> parts of each picture, except for the name picture size. They keep the pictures the correct size in Apple Mail, Outlook and other clients.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  var STORE_KEY = "orsen-signature-builder-v1";
+  var DEFAULTS = {
+    nameImg: "", nameW: 200, nameH: 44,
+    name: "Firstname Lastname", title: "Job Title", divider: "#59add2",
+    phone: "+41 00 000 00 00", email: "firstname@orsen.ch",
+    addr1: "Rue de La Gare 28", addr2: "1260 Nyon, Switzerland", web: "www.orsen.ch",
+    liUrl: "https://www.linkedin.com/company/orsen-sa/", liImg: "",
+    ytUrl: "https://www.youtube.com/@Orsen_SA", ytImg: "",
+    bannerImg: "", bannerUrl: "https://www.orsen.ch/"
+  };
+  var IMAGE_KEYS = ["nameImg", "liImg", "ytImg", "bannerImg"];
+  var IMAGE_LABELS = { nameImg: "Name picture", liImg: "LinkedIn icon", ytImg: "YouTube icon", bannerImg: "Banner" };
+
+  var TOKENS = [
+    ["NAME_PICTURE_URL", "Address of the name and title picture"],
+    ["NAME_PICTURE_WIDTH", "Display width of the name picture in pixels, for example 200"],
+    ["NAME_PICTURE_HEIGHT", "Display height of the name picture in pixels, for example 44. Keep the picture's proportions."],
+    ["FULL_NAME", "Full name, shown when a client blocks pictures"],
+    ["JOB_TITLE", "Job title, shown when a client blocks pictures"],
+    ["PHONE_DIGITS", "Phone number with no spaces, for example +41793843366"],
+    ["PHONE_NUMBER", "Phone number as it should show, for example +41 79 384 33 66"],
+    ["EMAIL_ADDRESS", "Email address"],
+    ["ADDRESS_LINE_1", "First address line"],
+    ["ADDRESS_LINE_2", "Second address line"],
+    ["WEBSITE", "Website without https://, for example www.orsen.ch"],
+    ["LINKEDIN_PAGE_URL", "LinkedIn page address"],
+    ["LINKEDIN_ICON_URL", "Address of the LinkedIn icon picture"],
+    ["YOUTUBE_PAGE_URL", "YouTube page address"],
+    ["YOUTUBE_ICON_URL", "Address of the YouTube icon picture"],
+    ["BANNER_LINK", "Page that opens when someone clicks the banner"],
+    ["BANNER_URL", "Address of the banner picture"]
+  ];
+
+  function placeholder(w, h) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+      '<rect x="0.5" y="0.5" width="' + (w - 1) + '" height="' + (h - 1) + '" fill="#d5d8dc" stroke="#9aa0a6"/>' +
+      '<line x1="0" y1="0" x2="' + w + '" y2="' + h + '" stroke="#9aa0a6"/>' +
+      '<line x1="' + w + '" y1="0" x2="0" y2="' + h + '" stroke="#9aa0a6"/></svg>';
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function load() {
+    var v = {};
+    try { v = JSON.parse(localStorage.getItem(STORE_KEY) || "{}") || {}; } catch (e) { v = {}; }
+    var out = {};
+    Object.keys(DEFAULTS).forEach(function (k) { out[k] = (k in v) ? v[k] : DEFAULTS[k]; });
+    return out;
+  }
+  function save(v) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch (e) { /* storage unavailable */ }
+  }
+
+  // Builds the signature HTML. Every value in `f` is inserted as given (already escaped or a token).
+  function build(f) {
+    var rows = [];
+    rows.push(
+      '  <tr>\n    <td style="padding:0 0 12px 0;">\n' +
+      '      <img src="' + f.nameImg + '" alt="' + f.alt + '" width="' + f.nameW + '" height="' + f.nameH + '" style="display:block;width:' + f.nameW + 'px;height:' + f.nameH + 'px;max-width:' + f.nameW + 'px;border:0;outline:none;"' + (f.attr.nameImg || "") + '>\n' +
+      '    </td>\n  </tr>');
+    rows.push(
+      '  <tr>\n    <td style="padding:0 0 12px 0;">\n' +
+      '      <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>\n' +
+      '        <td width="96" height="2" style="width:96px;height:2px;font-size:0;line-height:0;background-color:' + f.divider + ';">&nbsp;</td>\n' +
+      '      </tr></table>\n    </td>\n  </tr>');
+    var lines = [];
+    if (f.phone) lines.push('<a href="tel:' + f.tel + '" style="color:#1155cc;text-decoration:underline;">' + f.phone + '</a>');
+    if (f.email) lines.push('<a href="mailto:' + f.emailHref + '" style="color:#1155cc;text-decoration:underline;">' + f.email + '</a>');
+    if (f.addr1) lines.push(f.addr1);
+    if (f.addr2) lines.push(f.addr2);
+    if (f.web) lines.push('<a href="' + f.webHref + '" style="color:#1f1f1f;text-decoration:none;font-weight:bold;">' + f.web + '</a>');
+    rows.push(
+      '  <tr>\n    <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:22px;color:#202124;padding:0 0 12px 0;">\n      ' +
+      lines.join('<br>\n      ') + '\n    </td>\n  </tr>');
+    var icons = [];
+    if (f.liUrl) icons.push(['<a href="' + f.liUrl + '"><img src="' + f.liImg + '" alt="LinkedIn" width="28" height="28" style="display:block;width:28px;height:28px;border:0;"' + (f.attr.liImg || "") + '></a>']);
+    if (f.ytUrl) icons.push(['<a href="' + f.ytUrl + '"><img src="' + f.ytImg + '" alt="YouTube" width="28" height="28" style="display:block;width:28px;height:28px;border:0;"' + (f.attr.ytImg || "") + '></a>']);
+    if (icons.length) {
+      rows.push(
+        '  <tr>\n    <td style="padding:0 0 8px 0;">\n' +
+        '      <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>\n' +
+        icons.map(function (c, i) {
+          return '        <td style="padding:0' + (i < icons.length - 1 ? ' 6px 0 0' : '') + ';">' + c[0] + '</td>';
+        }).join('\n') +
+        '\n      </tr></table>\n    </td>\n  </tr>');
+    }
+    rows.push(
+      '  <tr>\n    <td style="padding:0;">\n' +
+      '      <a href="' + f.bannerUrl + '"><img src="' + f.bannerImg + '" alt="Orsen - The agency focused on you" width="420" height="41" style="display:block;width:420px;height:41px;max-width:420px;border:0;"' + (f.attr.bannerImg || "") + '></a>\n' +
+      '    </td>\n  </tr>');
+    return '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;border:0;margin:0;padding:0;width:420px;font-family:Arial,Helvetica,sans-serif;color:#000000;">\n' +
+      rows.join('\n') + '\n</table>';
+  }
+
+  function fieldsFrom(v, forPreview) {
+    var w = Math.max(1, parseInt(v.nameW, 10) || DEFAULTS.nameW);
+    var h = Math.max(1, parseInt(v.nameH, 10) || DEFAULTS.nameH);
+    var web = String(v.web || "").trim().replace(/^https?:\/\//i, "").replace(/\/$/, "");
+    function img(k, pw, ph) {
+      var u = normaliseImageUrl(String(v[k] || "").trim());
+      if (!u && forPreview) return placeholder(pw, ph);
+      return esc(u);
+    }
+    var attr = {};
+    if (forPreview) IMAGE_KEYS.forEach(function (k) { attr[k] = ' data-img="' + k + '"'; });
+    var nameAlt = [v.name, v.title].map(function (s) { return String(s || "").trim(); }).filter(Boolean).join(" - ");
+    return {
+      nameImg: img("nameImg", w, h), nameW: w, nameH: h, alt: esc(nameAlt),
+      divider: /^#[0-9a-f]{6}$/i.test(v.divider) ? v.divider : DEFAULTS.divider,
+      phone: esc(String(v.phone || "").trim()), tel: esc(String(v.phone || "").replace(/[^\d+]/g, "")),
+      email: esc(String(v.email || "").trim()), emailHref: esc(String(v.email || "").trim()),
+      addr1: esc(String(v.addr1 || "").trim()), addr2: esc(String(v.addr2 || "").trim()),
+      web: esc(web), webHref: esc("https://" + web + "/"),
+      liUrl: esc(String(v.liUrl || "").trim()), liImg: img("liImg", 28, 28),
+      ytUrl: esc(String(v.ytUrl || "").trim()), ytImg: img("ytImg", 28, 28),
+      bannerImg: img("bannerImg", 420, 41), bannerUrl: esc(String(v.bannerUrl || "").trim()),
+      attr: attr
+    };
+  }
+
+  function templateFields() {
+    return {
+      nameImg: "NAME_PICTURE_URL", nameW: "NAME_PICTURE_WIDTH", nameH: "NAME_PICTURE_HEIGHT", alt: "FULL_NAME - JOB_TITLE",
+      divider: DEFAULTS.divider, phone: "PHONE_NUMBER", tel: "PHONE_DIGITS",
+      email: "EMAIL_ADDRESS", emailHref: "EMAIL_ADDRESS", addr1: "ADDRESS_LINE_1", addr2: "ADDRESS_LINE_2",
+      web: "WEBSITE", webHref: "https://WEBSITE/", liUrl: "LINKEDIN_PAGE_URL", liImg: "LINKEDIN_ICON_URL",
+      ytUrl: "YOUTUBE_PAGE_URL", ytImg: "YOUTUBE_ICON_URL", bannerImg: "BANNER_URL", bannerUrl: "BANNER_LINK", attr: {}
+    };
+  }
+
+  function normaliseImageUrl(u) {
+    var m = String(u).match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)/);
+    return m ? "https://lh3.googleusercontent.com/d/" + m[1] : u;
+  }
+
+  var values = load();
+  var preview = document.getElementById("preview");
+  var statusEl = document.getElementById("status");
+  var inputs = Array.prototype.slice.call(document.querySelectorAll("[data-k]"));
+  var lastHtml = "";
+
+  function note(k, text, cls) {
+    var el = document.querySelector('[data-note="' + k + '"]');
+    if (!el) return;
+    el.textContent = text || "";
+    el.className = "note" + (cls ? " " + cls : "");
+  }
+
+  function render() {
+    var html = build(fieldsFrom(values, true));
+    if (html === lastHtml) return;
+    lastHtml = html;
+    preview.innerHTML = html;
+    Array.prototype.forEach.call(preview.querySelectorAll("img[data-img]"), function (im) {
+      var k = im.getAttribute("data-img");
+      if (!String(values[k] || "").trim()) { note(k, ""); return; }
+      im.addEventListener("error", function () {
+        im.src = placeholder(parseInt(im.getAttribute("width"), 10), parseInt(im.getAttribute("height"), 10));
+        note(k, "This picture did not load. Check the address, and check that the file is shared as Anyone with the link.", "warn");
+      }, { once: true });
+      im.addEventListener("load", function () {
+        if (im.src.indexOf("data:") === 0) return;
+        note(k, "Picture loaded (" + im.naturalWidth + " × " + im.naturalHeight + " px file).", "ok");
+        if (k === "nameImg" && im.naturalWidth) {
+          var h = Math.round(values.nameW * im.naturalHeight / im.naturalWidth);
+          if (h && h !== parseInt(values.nameH, 10)) {
+            values.nameH = h;
+            document.getElementById("nameH").value = h;
+            save(values);
+            render();
+          }
+        }
+      }, { once: true });
+    });
+  }
+
+  inputs.forEach(function (el) {
+    var k = el.getAttribute("data-k");
+    el.value = values[k];
+    el.addEventListener("input", function () {
+      var val = el.value;
+      if (IMAGE_KEYS.indexOf(k) !== -1) {
+        var fixed = normaliseImageUrl(val.trim());
+        if (fixed !== val.trim()) {
+          el.value = val = fixed;
+        }
+      }
+      values[k] = (el.type === "number") ? (parseInt(val, 10) || "") : val;
+      save(values);
+      render();
+    });
+  });
+
+  document.getElementById("reset").addEventListener("click", function () {
+    if (!confirm("Reset every field to its starting value?")) return;
+    values = JSON.parse(JSON.stringify(DEFAULTS));
+    inputs.forEach(function (el) { el.value = values[el.getAttribute("data-k")]; });
+    IMAGE_KEYS.forEach(function (k) { note(k, ""); });
+    save(values);
+    render();
+  });
+
+  function setStatus(el, text, cls) {
+    el.textContent = text;
+    el.className = "status" + (cls ? " " + cls : "");
+  }
+
+  function copyRich(html, text) {
+    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+      return navigator.clipboard.write([new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([text], { type: "text/plain" })
+      })]);
+    }
+    return new Promise(function (resolve, reject) {
+      var holder = document.createElement("div");
+      holder.innerHTML = html;
+      holder.style.cssText = "position:fixed;left:-9999px;top:0;background:#fff;color:#000;";
+      document.body.appendChild(holder);
+      var range = document.createRange();
+      range.selectNodeContents(holder);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      var ok = document.execCommand("copy");
+      sel.removeAllRanges();
+      document.body.removeChild(holder);
+      ok ? resolve() : reject(new Error("copy failed"));
+    });
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;left:-9999px;top:0;";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("copy failed"));
+    });
+  }
+
+  document.getElementById("copySig").addEventListener("click", function () {
+    var missing = IMAGE_KEYS.filter(function (k) { return !String(values[k] || "").trim(); });
+    if (missing.length) {
+      setStatus(statusEl, "Add these picture addresses first: " + missing.map(function (k) { return IMAGE_LABELS[k]; }).join(", ") + ".", "warn");
+      return;
+    }
+    var broken = IMAGE_KEYS.filter(function (k) {
+      var el = document.querySelector('[data-note="' + k + '"]');
+      return el && el.classList.contains("warn");
+    });
+    if (broken.length) {
+      setStatus(statusEl, "These pictures did not load: " + broken.map(function (k) { return IMAGE_LABELS[k]; }).join(", ") + ". Fix them first.", "warn");
+      return;
+    }
+    var html = build(fieldsFrom(values, false));
+    var text = [values.name + " - " + values.title, values.phone, values.email, values.addr1, values.addr2, values.web]
+      .filter(function (s) { return String(s || "").trim(); }).join("\n");
+    copyRich(html, text).then(function () {
+      setStatus(statusEl, "Copied. Paste it into the Gmail signature box.", "ok");
+    }, function () {
+      setStatus(statusEl, "Copy failed. Select the signature with the mouse and copy it instead.", "warn");
+    });
+  });
+
+  var templateHtml = '<!doctype html>\n<html>\n<head><meta charset="utf-8"><title>Signature</title></head>\n' +
+    '<body style="margin:0;padding:16px;background:#ffffff;color:#000000;font-family:Arial,Helvetica,sans-serif;">\n' +
+    build(templateFields()) + '\n</body>\n</html>\n';
+  document.getElementById("template").textContent = templateHtml;
+  document.getElementById("keys").innerHTML = TOKENS.map(function (t) {
+    return "<tr><td><code>" + t[0] + "</code></td><td>" + esc(t[1]) + "</td></tr>";
+  }).join("");
+  document.getElementById("copyCode").addEventListener("click", function () {
+    var el = document.getElementById("codeStatus");
+    copyText(templateHtml).then(function () { setStatus(el, "Code copied.", "ok"); },
+      function () { setStatus(el, "Copy failed. Select the code with the mouse and copy it instead.", "warn"); });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
